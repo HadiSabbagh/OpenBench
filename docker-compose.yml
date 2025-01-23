@@ -1,0 +1,27 @@
+services:
+  openbench:
+    image: ${DOCKER_REGISTRY-}openbench
+    build:
+      context: OpenBenchAPI
+      dockerfile: Dockerfile
+    ports:
+      - "56756:8080" 
+      - "56755:8081" 
+    depends_on:
+        - postgres
+
+    environment:
+        - POSTGRESSETTINGS:PASSWORD=123456
+        - POSTGRESSETTINGS:HOST=postgres
+        - ConnectionStrings__DefaultConnection=host=postgres;Database=gamebench;port=5432; username=postgres;Password=123456
+  postgres:
+    image: postgres
+    container_name: game-bench-db
+    hostname: postgres
+    ports:
+    - "5435:5432"
+    environment:
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "gamebench"
+    restart: unless-stopped    
