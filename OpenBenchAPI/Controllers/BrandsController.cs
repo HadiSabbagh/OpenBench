@@ -20,17 +20,8 @@ namespace OpenBench.Controllers
         [HttpGet("GetAllRows")]
         public async Task<ActionResult<List<BrandDto>>> GetAllRows()
         {
-            try
-            {
-                var list = await _service.GetAllRows();
-                return Ok(list);
-
-            }
-            catch (InvalidOperationException e)
-            {
-
-                return StatusCode(500, e.Message);
-            }
+            var list = await _service.GetAllRows();
+            return Ok(list);
         }
 
 
@@ -42,64 +33,33 @@ namespace OpenBench.Controllers
             {
                 return BadRequest("Entity cannot be null");
             }
-            try
-            {
-                await _service.AddRow(entity);
-                return Ok();
-
-            }
-            catch (DbUpdateException e)
-            {
-                return StatusCode(500, e.Message);
-            }
+            await _service.AddRow(entity);
+            return Created();
         }
 
         [HttpPut("EditRow")]
         public async Task<ActionResult> Edit(int id, BrandDto entity)
         {
-            try
+            if (entity == null)
             {
-                await _service.UpdateRow(id, entity);
-                return Ok();
+                return BadRequest("Entity cannot be null");
             }
-            catch (DbUpdateException e)
-            {
-                return StatusCode(500, e.Message);
-            }
-
+            await _service.UpdateRow(id, entity);
+            return Ok();
         }
 
         [HttpGet("RowDetails")]
         public async Task<ActionResult> Details(int id)
         {
-            try
-            {
-                var found = await _service.GetRowById(id);
-                return Ok(found);
-            }
-            catch (DbUpdateException e)
-            {
-                return StatusCode(500, e.Message);
-            }
-
-
+            var found = await _service.GetRowById(id);
+            return Ok(found);
         }
 
         [HttpDelete("DeleteRow")]
         public async Task<ActionResult> Delete(int id)
         {
-
-            try
-            {
-                await _service.DeleteRow(id);
-                return Ok();
-            }
-            catch (DbUpdateException e)
-            {
-                return StatusCode(500, e.Message);
-
-            }
-
+            await _service.DeleteRow(id);
+            return Ok();
         }
     }
 

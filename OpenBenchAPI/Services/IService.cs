@@ -7,7 +7,7 @@ namespace OpenBench.Services
     {
         Task<List<T>> GetAllRows();
 
-        Task<T> GetRowById(int? id);
+        Task<T> GetRowById(int id);
 
         Task<T> AddRow(T entity);
 

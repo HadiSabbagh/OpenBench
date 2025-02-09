@@ -7,11 +7,12 @@ namespace OpenBench.Repositories
     public class GameRepository : CoreRepository<Game, BenchWebContext>
     {
         private readonly BenchWebContext _dbContext;
-        public GameRepository(BenchWebContext context) : base(context)
+        private readonly ILogger<GameRepository> _logger;
+        public GameRepository(BenchWebContext context, ILogger<GameRepository> logger) : base(context, logger)
         {
 
             _dbContext = context;
-
+            _logger = logger;
         }
     }
 }

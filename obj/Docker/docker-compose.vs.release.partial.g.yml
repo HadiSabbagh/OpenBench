@@ -7,7 +7,7 @@ services:
         BUILD_CONFIGURATION: Debug
       labels:
         com.microsoft.created-by: "visual-studio"
-        com.microsoft.visual-studio.project-name: "OpenBench"
+        com.microsoft.visual-studio.project-name: "OpenBenchAPI"
     volumes:
       - C:\Users\Hadi Sabbagh\vsdbg\vs2017u5:/remote_debugger:rw
       - C:\Users\Hadi Sabbagh\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
@@ -20,8 +20,8 @@ services:
     entrypoint: "dotnet --roll-forward Major /VSTools/DistrolessHelper/DistrolessHelper.dll --wait"
     labels:
       com.microsoft.visualstudio.debuggee.program: "dotnet"
-      com.microsoft.visualstudio.debuggee.arguments: " --additionalProbingPath /.nuget/packages --additionalProbingPath /.nuget/fallbackpackages --additionalProbingPath /.nuget/fallbackpackages2  \"/app/OpenBench.dll\""
+      com.microsoft.visualstudio.debuggee.arguments: " --additionalProbingPath /.nuget/packages --additionalProbingPath /.nuget/fallbackpackages --additionalProbingPath /.nuget/fallbackpackages2  \"/app/OpenBenchAPI.dll\""
       com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
       com.microsoft.visualstudio.debuggee.killprogram: "dotnet --roll-forward Major /VSTools/DistrolessHelper/DistrolessHelper.dll --stop dotnet"
-      com.microsoft.visual-studio.project-name: "OpenBench"
+      com.microsoft.visual-studio.project-name: "OpenBenchAPI"
     tty: true

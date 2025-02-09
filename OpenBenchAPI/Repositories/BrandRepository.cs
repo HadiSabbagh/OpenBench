@@ -6,10 +6,11 @@ namespace OpenBench.Repositories
     public class BrandRepository : CoreRepository<Brand, BenchWebContext>
     {
         private readonly BenchWebContext _dbContext;
-
-        public BrandRepository(BenchWebContext context) : base(context)
+        private readonly ILogger<BrandRepository> _logger;
+        public BrandRepository(BenchWebContext context, ILogger<BrandRepository> logger) : base(context, logger)
         {
             _dbContext = context;
+            _logger = logger;
         }
     }
 }

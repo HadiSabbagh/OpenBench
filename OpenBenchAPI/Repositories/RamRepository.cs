@@ -7,11 +7,12 @@ namespace OpenBench.Repositories
     public class RamRepository : CoreRepository<Ram, BenchWebContext>
     {
         private readonly BenchWebContext _dbContext;
-        public RamRepository(BenchWebContext context) : base(context)
+        private readonly ILogger<RamRepository> _logger;
+        public RamRepository(BenchWebContext context, ILogger<RamRepository> logger) : base(context, logger)
         {
 
             _dbContext = context;
-
+            _logger = logger;
         }
     }
 }

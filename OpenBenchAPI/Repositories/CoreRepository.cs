@@ -7,41 +7,30 @@ using System.Xml.Linq;
 namespace OpenBench.Repositories
 {
     public abstract class CoreRepository<TEntity, TDbContext> : IRepository<TEntity>
-        where TEntity : class, IEntity
-        where TDbContext : DbContext
+            where TEntity : class, IEntity
+            where TDbContext : DbContext
     {
         private readonly TDbContext _dbContext;
-        public CoreRepository(TDbContext context)
+        private readonly ILogger<CoreRepository<TEntity, TDbContext>> _logger;
+        public CoreRepository(TDbContext context, ILogger<CoreRepository<TEntity, TDbContext>> logger)
         {
             this._dbContext = context;
+            _logger = logger;
         }
 
         public async Task<List<TEntity>> GetAllRows()
         {
-            try
-            {
-                return await _dbContext.Set<TEntity>().ToListAsync();
-            }
-            catch (DbUpdateException e)
-            {
-                await Console.Out.WriteLineAsync(e.Message);
-                throw;
-            }
-
+            return await _dbContext.Set<TEntity>().ToListAsync();
         }
 
-        public async Task<TEntity> GetRowById(int? id)
+        public async Task<TEntity> GetRowById(int id)
         {
-            try
+            var found = await _dbContext.Set<TEntity>().FindAsync(id);
+            if (found == null)
             {
-                return await _dbContext.Set<TEntity>().FindAsync(id);
-
+                throw new KeyNotFoundException($"{typeof(TEntity).Name} with ID {id} was not found");
             }
-            catch (Exception e)
-            {
-                await Console.Out.WriteLineAsync(e.Message);
-                throw;
-            }
+            return found;
 
         }
 
@@ -55,8 +44,8 @@ namespace OpenBench.Repositories
             }
             catch (DbUpdateException e)
             {
-                await Console.Out.WriteLineAsync(e.Message);
-                throw;
+                _logger.LogError($"Database update failed: {e.Message}");
+                throw new DbUpdateException("An error occurred while updating the database.", e);
             }
         }
 
@@ -70,8 +59,8 @@ namespace OpenBench.Repositories
             }
             catch (DbUpdateException e)
             {
-                await Console.Out.WriteLineAsync(e.Message);
-                throw;
+                _logger.LogError($"Database update failed: {e.Message}");
+                throw new DbUpdateException($"An error occurred while updating the entity {typeof(TEntity).Name}.", e);
             }
         }
 
@@ -80,16 +69,20 @@ namespace OpenBench.Repositories
             try
             {
 
-                var entity = GetRowById(id);
-                _dbContext.Set<TEntity>().Remove(await entity);
+                var entity = await _dbContext.Set<TEntity>().FindAsync(id);
+                if (entity == null)
+                {
+                    throw new KeyNotFoundException($"{typeof(TEntity).Name} with ID {id} was not found");
+                }
+                _dbContext.Set<TEntity>().Remove(entity);
                 await _dbContext.SaveChangesAsync();
 
 
             }
             catch (DbUpdateException e)
             {
-                await Console.Out.WriteLineAsync(e.Message);
-                throw;
+                _logger.LogError($"Error deleting entity with ID {id}: {e.Message}");
+                throw new DbUpdateException($"An error occurred while deleting the entity {typeof(TEntity).Name}.", e);
             }
         }
 
@@ -102,8 +95,8 @@ namespace OpenBench.Repositories
             }
             catch (DbUpdateException e)
             {
-                await Console.Out.WriteLineAsync(e.Message);
-                throw;
+                _logger.LogError($"Error finding entity: {e.Message}");
+                throw new DbUpdateException($"An error occurred while retrieving the entity {typeof(TEntity).Name} with IDs {keyValues}.", e);
             }
         }
     }

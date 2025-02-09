@@ -14,13 +14,10 @@ namespace OpenBench.Services
         {
             Ram ram = Ram.FromDto(entity);
             await repository.AddRow(ram);
-            return entity;
+            return RamDto.FromDao(ram);
+
         }
 
-        public async Task DeleteRow(int id)
-        {
-            await repository.DeleteRow(id);
-        }
 
         public async Task<RamDto> FindRowByCompositeIds(object[] keyValues)
         {
@@ -31,21 +28,43 @@ namespace OpenBench.Services
         public async Task<List<RamDto>> GetAllRows()
         {
             List<Ram> rams = await repository.GetAllRows();
+            if (rams == null)
+            {
+                return [];
+            }
             List<RamDto> ramDtos = rams.Select(ram => RamDto.FromDao(ram)).ToList();
             return ramDtos;
         }
 
-        public async Task<RamDto> GetRowById(int? id)
+        public async Task<RamDto> GetRowById(int id)
         {
             Ram ram = await repository.GetRowById(id);
+            if (ram == null)
+            {
+                throw new KeyNotFoundException($"Ram with ID {id} was not found.");
+            }
             return RamDto.FromDao(ram);
         }
 
-        public async Task<RamDto> UpdateRow(int id, RamDto entity)
+        public async Task<RamDto> UpdateRow(int id, RamDto modifiedRow)
         {
-            Ram ram = Ram.FromDto(entity);
+            Ram oldRam = await repository.GetRowById(id);
+            if (oldRam == null)
+            {
+                throw new KeyNotFoundException($"Ram with ID {id} was not found.");
+            }
+            Ram ram = Ram.FromDto(modifiedRow);
             await repository.UpdateRow(ram);
-            return entity;
+            return modifiedRow;
+        }
+        public async Task DeleteRow(int id)
+        {
+            var foundRam = await repository.GetRowById(id);
+            if (foundRam == null)
+            {
+                throw new KeyNotFoundException($"Ram with ID {id} was not found.");
+            }
+            await repository.DeleteRow(id);
         }
     }
 }

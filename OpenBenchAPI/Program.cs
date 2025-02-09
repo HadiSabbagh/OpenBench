@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenBench.Data;
 using OpenBench.Repositories;
 using OpenBench.Services;
+using OpenBenchAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,7 @@ builder.Services.AddScoped<ResultService>();
 var app = builder.Build();
 app.UseRewriter(new RewriteOptions().AddRedirect("^$", "/swagger"));
 
+app.UseMiddleware<ServiceExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -58,6 +60,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
 
 app.MapControllers();
 

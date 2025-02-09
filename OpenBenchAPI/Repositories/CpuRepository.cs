@@ -7,10 +7,11 @@ namespace OpenBench.Repositories
     public class CpuRepository : CoreRepository<Cpu, BenchWebContext>
     {
         private readonly BenchWebContext _dbContext;
-
-        public CpuRepository(BenchWebContext context) : base(context)
+        private readonly ILogger<CpuRepository> _logger;
+        public CpuRepository(BenchWebContext context, ILogger<CpuRepository> logger) : base(context, logger)
         {
             _dbContext = context;
+            _logger = logger;
         }
 
     }

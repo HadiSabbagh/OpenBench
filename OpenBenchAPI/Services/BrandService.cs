@@ -15,14 +15,10 @@ namespace OpenBench.Services
         {
             Brand brand = Brand.FromDto(entity);
             await repository.AddRow(brand);
-            return entity;
+            return BrandDto.FromDao(brand);
         }
 
-        public async Task DeleteRow(int id)
-        {
-            await repository.DeleteRow(id);
-        }
-
+       
         public async Task<BrandDto> FindRowByCompositeIds(object[] keyValues)
         {
             Brand brand = await repository.FindRowByCompositeIds(keyValues);
@@ -32,13 +28,21 @@ namespace OpenBench.Services
         public async Task<List<BrandDto>> GetAllRows()
         {
             List<Brand> brands = await repository.GetAllRows();
+            if(brands == null)
+            {
+                return [];
+            }
             List<BrandDto> brandDtos = brands.Select(brand => BrandDto.FromDao(brand)).ToList();
             return brandDtos;
         }
 
-        public async Task<BrandDto> GetRowById(int? id)
+        public async Task<BrandDto> GetRowById(int id)
         {
             Brand brand = await repository.GetRowById(id);
+            if (brand == null)
+            {
+                throw new KeyNotFoundException($"Brand with ID {id} was not found.");
+            }
             return BrandDto.FromDao(brand);
         }
 
@@ -52,9 +56,20 @@ namespace OpenBench.Services
             }
             else
             {
-                throw new InvalidOperationException("Row not found");
+                throw new KeyNotFoundException($"Brand with ID {id} was not found.");
             }
             return modifiedRow;
         }
+
+        public async Task DeleteRow(int id)
+        {
+            var found = await repository.GetRowById(id);
+            if (found == null)
+            {
+                throw new KeyNotFoundException($"Brand with ID {id} was not found.");
+            }
+            await repository.DeleteRow(id);
+        }
+
     }
 }

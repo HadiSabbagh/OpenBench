@@ -14,13 +14,10 @@ namespace OpenBench.Services
         {
             Result result = Result.FromDto(entity);
             await repository.AddRow(result);
-            return entity;
+            return ResultDto.FromDao(result);
         }
 
-        public async Task DeleteRow(int id)
-        {
-            await repository.DeleteRow(id);
-        }
+       
 
         public async Task<ResultDto> FindRowByCompositeIds(object[] keyValues)
         {
@@ -31,21 +28,44 @@ namespace OpenBench.Services
         public async Task<List<ResultDto>> GetAllRows()
         {
             List<Result> results = await repository.GetAllRows();
+            if (results == null)
+            {
+                return [];
+            }
             List<ResultDto> resultDtos = results.Select(result => ResultDto.FromDao(result)).ToList();
             return resultDtos;
         }
 
-        public async Task<ResultDto> GetRowById(int? id)
+        public async Task<ResultDto> GetRowById(int id)
         {
             Result result = await repository.GetRowById(id);
+            if (result == null)
+            {
+                throw new KeyNotFoundException($"Result with ID {id} was not found.");
+            }
             return ResultDto.FromDao(result);
         }
 
-        public async Task<ResultDto> UpdateRow(int id, ResultDto entity)
+        public async Task<ResultDto> UpdateRow(int id, ResultDto modifiedRow)
         {
-            Result result = Result.FromDto(entity);
+            Result oldResult = await repository.GetRowById(id);
+            if (oldResult == null)
+            {
+                throw new KeyNotFoundException($"Result with ID {id} was not found.");
+            }
+            Result result = Result.FromDto(modifiedRow);
             await repository.UpdateRow(result);
-            return entity;
+            return modifiedRow;
+        }
+
+        public async Task DeleteRow(int id)
+        {
+            var foundResult = await repository.GetRowById(id);
+            if (foundResult == null)
+            {
+                throw new KeyNotFoundException($"Result with ID {id} was not found.");
+            }
+            await repository.DeleteRow(id);
         }
     }
 }

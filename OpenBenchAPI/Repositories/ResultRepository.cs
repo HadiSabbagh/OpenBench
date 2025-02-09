@@ -8,10 +8,12 @@ namespace OpenBench.Repositories
     public class ResultRepository : CoreRepository<Result, BenchWebContext>
     {
         private readonly BenchWebContext _dbContext;
+        private readonly ILogger<ResultRepository> _logger;
 
-        public ResultRepository(BenchWebContext context) : base(context)
+        public ResultRepository(BenchWebContext context, ILogger<ResultRepository> logger) : base(context, logger)
         {
             _dbContext = context;
+            _logger = logger;
         }
         public async Task<List<Result>> FilterByAverageFps(double number)
         {

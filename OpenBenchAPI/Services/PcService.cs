@@ -14,13 +14,11 @@ namespace OpenBench.Services
         {
             Pc pc = Pc.FromDto(entity);
             await repository.AddRow(pc);
-            return entity;
+            return PcDto.FromDao(pc);
+
         }
 
-        public async Task DeleteRow(int id)
-        {
-            await repository.DeleteRow(id);
-        }
+
 
         public async Task<PcDto> FindRowByCompositeIds(object[] keyValues)
         {
@@ -31,21 +29,44 @@ namespace OpenBench.Services
         public async Task<List<PcDto>> GetAllRows()
         {
             List<Pc> pcs = await repository.GetAllRows();
+            if (pcs == null)
+            {
+                return [];
+            }
             List<PcDto> pcDtos = pcs.Select(pc => PcDto.FromDao(pc)).ToList();
             return pcDtos;
         }
 
-        public async Task<PcDto> GetRowById(int? id)
+        public async Task<PcDto> GetRowById(int id)
         {
             Pc pc = await repository.GetRowById(id);
+            if (pc == null)
+            {
+                throw new KeyNotFoundException($"Pc with ID {id} was not found.");
+            }
             return PcDto.FromDao(pc);
         }
 
-        public async Task<PcDto> UpdateRow(int id, PcDto entity)
+        public async Task<PcDto> UpdateRow(int id, PcDto modifiedRow)
         {
-            Pc pc = Pc.FromDto(entity);
+            Pc oldPc = await repository.GetRowById(id);
+            if (oldPc == null)
+            {
+                throw new KeyNotFoundException($"Pc with ID {id} was not found.");
+            }
+            Pc pc = Pc.FromDto(modifiedRow);
             await repository.UpdateRow(pc);
-            return entity;
+            return modifiedRow;
+        }
+
+        public async Task DeleteRow(int id)
+        {
+            var found = await repository.GetRowById(id);
+            if (found == null)
+            {
+                throw new KeyNotFoundException($"Pc with ID {id} was not found.");
+            }
+            await repository.DeleteRow(id);
         }
     }
 }

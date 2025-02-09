@@ -14,13 +14,11 @@ namespace OpenBench.Services
         {
             Gpu gpu = Gpu.FromDto(entity);
             await repository.AddRow(gpu);
-            return entity;
+             return GpuDto.FromDao(gpu);
+
         }
 
-        public async Task DeleteRow(int id)
-        {
-            await repository.DeleteRow(id);
-        }
+
 
         public async Task<GpuDto> FindRowByCompositeIds(object[] keyValues)
         {
@@ -31,21 +29,44 @@ namespace OpenBench.Services
         public async Task<List<GpuDto>> GetAllRows()
         {
             List<Gpu> gpus = await repository.GetAllRows();
+            if (gpus == null)
+            {
+                return [];
+            }
             List<GpuDto> gpuDtos = gpus.Select(gpu => GpuDto.FromDao(gpu)).ToList();
             return gpuDtos;
         }
 
-        public async Task<GpuDto> GetRowById(int? id)
+        public async Task<GpuDto> GetRowById(int id)
         {
             Gpu gpu = await repository.GetRowById(id);
+            if (gpu == null)
+            {
+                throw new KeyNotFoundException($"Gpu with ID {id} was not found.");
+            }
             return GpuDto.FromDao(gpu);
         }
 
-        public async Task<GpuDto> UpdateRow(int id, GpuDto entity)
+        public async Task<GpuDto> UpdateRow(int id, GpuDto modifiedRow)
         {
-            Gpu gpu = Gpu.FromDto(entity);
+            Gpu oldGpu = await repository.GetRowById(id);
+            if (oldGpu == null)
+            {
+                throw new KeyNotFoundException($"Gpu with ID {id} was not found.");
+            }
+            Gpu gpu = Gpu.FromDto(modifiedRow);
             await repository.UpdateRow(gpu);
-            return entity;
+            return modifiedRow;
+        }
+
+        public async Task DeleteRow(int id)
+        {
+            var found = await repository.GetRowById(id);
+            if (found == null)
+            {
+                throw new KeyNotFoundException($"Gpu with ID {id} was not found.");
+            }
+            await repository.DeleteRow(id);
         }
     }
 }
